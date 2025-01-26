@@ -38,7 +38,6 @@ app.add_middleware(
 # テーブルの定義
 class User(Base):
     __tablename__ = "users"
-
     user_id = Column(String(50), primary_key=True, nullable=False)
     user_name = Column(String(100), nullable=False)
     password = Column(String(255), nullable=False)
