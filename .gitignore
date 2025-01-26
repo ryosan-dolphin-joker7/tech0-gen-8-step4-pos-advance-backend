@@ -62,6 +62,7 @@ docs/_build/
 
 # Environment files
 .env
+.env.local
 .pdm.toml
 .pdm-python
 .pdm-build/
