@@ -20,10 +20,10 @@ load_dotenv()  # .env をデフォルトとして読み込む
 load_dotenv(dotenv_path=".env.local", override=True)  # .env.local があれば上書き
 
 # 環境変数の読み込み
-DB_HOST = os.getenv("DB_HOST", "localhost")  # デフォルト値を設定
-DB_NAME = os.getenv("DB_NAME", "default_db")
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+DB_HOST = os.getenv("DB_HOST") 
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_SSL_CA = os.getenv("DB_SSL_CA")
 
 # MySQL接続URLを構築
