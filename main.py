@@ -19,10 +19,18 @@ logger = logging.getLogger(__name__)
 load_dotenv()  # .env をデフォルトとして読み込む
 load_dotenv(dotenv_path=".env.local", override=True)  # .env.local があれば上書き
 
-# データベース接続設定
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    raise ValueError("DATABASE_URL is not set in the environment variables")
+# 環境変数の読み込み
+DB_HOST = os.getenv("DB_HOST", "localhost")  # デフォルト値を設定
+DB_NAME = os.getenv("DB_NAME", "default_db")
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+DB_SSL_CA = os.getenv("DB_SSL_CA")
+
+# MySQL接続URLを構築
+DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}?ssl_ca={DB_SSL_CA}"
+
+if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_NAME, DB_SSL_CA]):
+    raise ValueError("Missing database configuration environment variables")
 
 # SQLAlchemyの設定（データベース接続）
 try:
