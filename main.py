@@ -8,7 +8,6 @@ from datetime import datetime
 from dotenv import load_dotenv
 import os
 import logging
-from passlib.context import CryptContext
 from typing import Optional
 from pydantic import BaseModel
 
@@ -52,8 +51,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# パスワードのハッシュ化設定
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # ユーザーモデルの定義
 class User(Base):
