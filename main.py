@@ -10,6 +10,7 @@ import os
 import logging
 from typing import Optional
 from pydantic import BaseModel
+from typing import List
 
 # ログの設定
 logging.basicConfig(level=logging.INFO)
@@ -60,16 +61,26 @@ app.add_middleware(
 )
 
 
-# ユーザーモデルの定義
-class User(Base):
-    __tablename__ = "users"
-    user_id = Column(String(50), primary_key=True, nullable=False)
-    user_name = Column(String(100), nullable=False)
-    password = Column(String(255), nullable=False)  # プレーンテキストのパスワードはNG
-    email = Column(String(100), nullable=False, unique=True)
-    role = Column(String(50), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+class Company(Base):
+    __tablename__ = "m_user_companies"
+
+    company_id = Column(String(50), primary_key=True)
+    company_name = Column(String(100), nullable=False)
+    password = Column(String(255), nullable=False)
+    company_token = Column(String(100), nullable=False)
+    created_at = Column(DateTime, nullable=False)
+    updated_at = Column(DateTime, nullable=False)
+
+# --- Pydantic スキーマ ---
+class CompanySchema(BaseModel):
+    company_id: str
+    company_name: str
+    company_token: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 # データベースセッションを取得する関数
 def get_db():
@@ -85,30 +96,27 @@ def get_db():
         if db:
             db.close()
 
-# Pydanticモデル（APIレスポンス用）
-class UserResponse(BaseModel):
-    user_id: str
-    user_name: str
-    email: str
-    role: str
-    created_at: datetime
-    updated_at: datetime
-
 # ルートエンドポイント
 @app.get("/")
 def read_root():
     """アプリのルートエンドポイント"""
     return {"message": "Hello, POSTアプリのAdvanceだよ!"}
 
-# ユーザー情報を取得するエンドポイント
-@app.get("/users/{user_id}", response_model=UserResponse)
-def read_user(user_id: str, db: Session = Depends(get_db)):
+# --- 1) すべての企業情報を取得 ---
+@app.get("/companies", response_model=List[CompanySchema])
+def read_companies(db: Session = Depends(get_db)):
+    companies = db.query(Company).all()
+    return companies
+
+# --- 2) 特定の企業情報を取得 ---
+@app.get("/companies/{company_id}", response_model=CompanySchema)
+def read_company(company_id: str, db: Session = Depends(get_db)):
     """指定されたユーザーIDの情報を取得"""
-    user: Optional[User] = db.query(User).filter(User.user_id == user_id).first()
-    if not user:
+    company: Optional[Company] = db.query(Company).filter(Company.company_id == company_id).first()
+    if not company:
         raise HTTPException(status_code=404, detail="User not found")
-    return user  # Pydanticが自動的にJSONへ変換
+    return company  # Pydanticが自動的にJSONへ変換
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
